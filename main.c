@@ -81,7 +81,17 @@ int infimoInterval(int x, int y){
 	register int y2 asm("ebx");
 	int aux3 = x2;
 	int aux4 = y2;
-	return infInterval(aux1,aux2,aux3,aux4);
+	int interval = infInterval(aux1,aux2,aux3,aux4);
+	toShow(interval);
+	register int limiteInferior asm("edx");
+	register int limiteSuperior asm("ebx");
+	int li = limiteInferior;
+	int ls = limiteSuperior;
+	if(li>=ls){
+		return 99999;
+	}else{
+		return interval;
+	}
 }
 
 int supremoInterval(int x, int y){
@@ -103,8 +113,10 @@ int setInterval(){
 	int b;
 	printf("limite inferior: ");
 	scanf("%d", &a);
-	printf("limite superior: ");
-	scanf("%d", &b);
+	do{
+		printf("limite superior: ");
+		scanf("%d", &b);
+	}while(a>b);
 	return createInterval(a,b);
 }
 
@@ -130,7 +142,12 @@ int showResults(int x, int y){
 	printf("\n");
 	printf("--------------------------------------\n");
 	printf("Infimo: ");
-	printInterval(infimoInterval(x,y));
+	int inter = infimoInterval(x,y);
+	if(inter == 99999){
+		printf("es vacio");
+	}else{
+		printInterval(inter);
+	}
 	printf("\n");
 	printf("--------------------------------------\n");
 	printf("Supremo: ");
