@@ -39,7 +39,11 @@ int sumaInterval(int x, int y){
 	register int y2 asm("ebx");
 	int aux3 = x2;
 	int aux4 = y2;
-	return addInterval(aux2,aux3,aux1,aux4);
+	if(((aux1+aux3)<32768)&&(((aux1+aux3)>-32768))&&((aux2+aux4)<32768)&&(((aux2+aux4)>-32768))){
+		return addInterval(aux2,aux3,aux1,aux4);
+	}else{
+		return 99999;
+	}
 }
 
 int restaInterval(int x, int y){
@@ -53,7 +57,11 @@ int restaInterval(int x, int y){
 	register int y2 asm("ebx");
 	int aux3 = x2;
 	int aux4 = y2;
-	return subInterval(aux1,aux2,aux3,aux4);
+	if(((aux1-aux3)<32768)&&(((aux1-aux3)>-32768))&&((aux2-aux4)<32768)&&(((aux2-aux4)>-32768))){
+		return subInterval(aux1,aux2,aux3,aux4);
+	}else{
+		return 99999;
+	}
 }
 
 int multiplicacionInterval(int x, int y){
@@ -67,7 +75,16 @@ int multiplicacionInterval(int x, int y){
 	register int y2 asm("ebx");
 	int aux3 = x2;
 	int aux4 = y2;
-	return mulInterval(aux1,aux2,aux3,aux4);
+	if(
+		(((aux1*aux3)<32768)&&((aux1*aux3)>-32768))&&
+		(((aux1*aux4)<32768)&&((aux1*aux4)>-32768))&&
+		(((aux2*aux3)<32768)&&((aux2*aux3)>-32768))&&
+		(((aux2*aux4)<32768)&&((aux2*aux4)>-32768))
+	){
+		return mulInterval(aux1,aux2,aux3,aux4);
+	}else{
+		return 99999;
+	}
 }
 
 int infimoInterval(int x, int y){
@@ -108,15 +125,24 @@ int supremoInterval(int x, int y){
 	return supInterval(aux1,aux2,aux3,aux4);
 }
 
+int repOk(int interval){
+	toShow(interval);
+	register int x asm("edx");
+	register int y asm("ebx");
+	return (x<=y);
+}
+
 int setInterval(){
 	int a;
 	int b;
-	printf("limite inferior: ");
-	scanf("%d", &a);
+	do{
+		printf("limite Inferior: ");
+		scanf("%d", &a);
+	}while((a>=32768)||(a<=-32768));
 	do{
 		printf("limite superior: ");
 		scanf("%d", &b);
-	}while(a>b);
+	}while((a>b)||((b>=32768)||(b<=-32768)));
 	return createInterval(a,b);
 }
 
@@ -130,15 +156,30 @@ int showResults(int x, int y){
 	printf("\n");
 	printf("--------------------------------------\n");
 	printf("Suma: ");
-	printInterval(sumaInterval(x,y));
+	int interSuma = sumaInterval(x,y);
+	if((interSuma==99999)||(!(repOk(interSuma)))){
+		printf("el numero intervalar es incorrecto o no se pudo representar en 16bits");
+	}else{
+		printInterval(interSuma);
+	}
 	printf("\n");
 	printf("--------------------------------------\n");
 	printf("Resta: ");
-	printInterval(restaInterval(x,y));
+	int interResta = restaInterval(x,y);
+	if((interResta==99999)||(!(repOk(interResta)))){
+		printf("el numero intervalar es incorrecto o no se pudo representar en 16bits");
+	}else{
+		printInterval(interResta);
+	}
 	printf("\n");
 	printf("--------------------------------------\n");
 	printf("Multiplicacion: ");
-	printInterval(multiplicacionInterval(x,y));
+	int interMul = multiplicacionInterval(x,y);
+	if((interMul==99999)||(!(repOk(interMul)))){
+		printf("el numero intervalar es incorrecto o no se pudo representar en 16bits");
+	}else{
+		printInterval(interMul);
+	}
 	printf("\n");
 	printf("--------------------------------------\n");
 	printf("Infimo: ");
@@ -146,12 +187,21 @@ int showResults(int x, int y){
 	if(inter == 99999){
 		printf("es vacio");
 	}else{
-		printInterval(inter);
+		if(repOk(inter)){
+			printInterval(inter);
+		}else{
+			printf("el numero intervalar es incorrecto");
+		}
 	}
 	printf("\n");
 	printf("--------------------------------------\n");
 	printf("Supremo: ");
-	printInterval(supremoInterval(x,y));
+	int interSup = supremoInterval(x,y);
+	if(repOk(interSup)){
+		printInterval(interSup);
+	}else{
+		printf("el numero intervalar es incorrecto");
+	}
 	printf("\n");
 	printf("--------------------------------------\n");
 	return 0;
