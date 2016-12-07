@@ -347,7 +347,7 @@ maxArray:
 
 	mov eax, 0
 	mov ecx, 0
-	mov eax, [ebp+8]			;Muevo el numero a eax
+	mov eax, [ebp+8]			;Muevo el numero a eax 
 	mov esi, 0						;Seteo esi(variable control)
 	add esi,12						;Le sumo 12(No tomamos el primer numero de la pila "ebp+8")
 	while_loop_max:
