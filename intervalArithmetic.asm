@@ -1,10 +1,11 @@
-global toInterval
-global addInterval
+;Exportamos las subrutinas.
+global toInterval       
+global addInterval      
 global subInterval
 global mulInterval
 global supInterval
 global infInterval
-global toShow
+global getIntervals
 
 section .data
 
@@ -41,7 +42,7 @@ toInterval:
 ; 	edx = limite superior
 ;
 
-toShow:
+getIntervals:
 
 	enter 0, 0
 
@@ -340,7 +341,6 @@ supInterval:
 ; @return
 ; 	eax = numero maximo
 ;
-
 
 maxArray:
 	enter 0,0
