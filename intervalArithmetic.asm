@@ -219,33 +219,43 @@ mulInterval:
 infInterval:
 	enter 0,0
 
-	mov ebx, 0						;Seteamos los registros
-	mov edx, 0						;
-	mov eax, 0						;
-	mov ecx, 0						;
+	mov eax,0
+	mov ecx,0
+	mov edx,0
+	mov ebx,0
 
-	mov ebx,[ebp+12]			;Movemos el limite superior a ebx
-	mov edx,[ebp+20]			;Movemos el limite superior a edx
-
-	push ebx							;Apilamos el primer numero
-	push edx							;Apilamos el segundo numero
-	call calcMin					;Llamamos a la subrutina para que calcule el minimo
-	add esp,8							;Desapilamos
+	mov eax,[ebp+12] ;ebp+12 =(1.2)
+	shr eax,16
+	push eax ;eax=1
+	mov eax,[ebp+8] ;ebp+8 =(3.4)
+	shr eax,16
+	push eax ;eax=3
+	mov eax,0
+	call calcMax
+	pop edx
+	pop edx
 
 	mov ebx,eax
 
-	mov eax,[ebp+8]				;Movemos el limite inferior a eax
-	mov ecx,[ebp+16]			;Movemos el limite inferior a ecx
+	mov eax,0
+	mov eax,[ebp+12]	;ebp+12 =(1.2)
+	shl eax,16
+	shr eax,16 ;eax = 2
+	push eax
+	mov eax,[ebp+8] ;ebp+8 =(3.4)
+	shl eax,16
+	shr eax,16
+	push eax
+	call calcMin
 
-	push eax							;Apilamos el primer numero
-	push ecx 							;Apilamos el segundo numero
-	call calcMax					;Llamamos a la subrutina para que calcule el maximo
-	add esp,8							;Desapilamos
+	pop edx
+	pop edx
 
-	push ebx							;Apilamos el minimo
-	push eax							;Apilamos el maximo
-	call toInterval				;Armamos el intervalo
-	add esp,8							;Desapilamos
+	push eax
+	push ebx
+	call toInterval
+	pop edx
+	pop edx
 
 	leave
 	ret
@@ -265,33 +275,42 @@ infInterval:
 supInterval:
 	enter 0,0
 
-	mov ebx, 0						;Seteamos los registros
-	mov edx, 0						;
-	mov eax, 0						;
-	mov ecx, 0					  ;
+	mov eax,0
+	mov ebx,0
+	mov ecx,0
+	mov ebx,0
 
-	mov ebx,[ebp+12]			;Movemos el limite superior a ebx
-	mov edx,[ebp+20]			;Movemos el limite superior a edx
+	mov eax,[ebp+12] ;ebp+12 =(1.2)
+	shr eax,16 ;eax=1
+	push eax
+	mov eax,0
+	mov eax,[ebp+8] ;ebp+8=(3.4)
+	shr eax,16 ;eax=3
+	push eax
+	call calcMin
+	pop edx
+	pop edx
 
-	push ebx							;Apilamos el primero numero
-	push edx							;Apilamos el segundo numero
-	call calcMax					;Llamamos a la subrutina para sacar el maximo entre los dos numeros
-	add esp,8							;Desapilamos
+	mov ebx,eax
+	mov eax,0
 
-	mov ebx,eax						;Ponemos el resultado en ebx
+	mov eax,[ebp+12] ;ebp+12 =(1.2)
+	shl eax, 16
+	shr eax, 16 ;eax = 2
+	push eax
+	mov eax,[ebp+8] ;ebp+8 = (3.4)
+	shl eax,16
+	shr eax,16 ;eax = 4
+	push eax
+	call calcMax
+	pop edx
+	pop edx
 
-	mov eax,[ebp+8]				;Movemos el limite inferior a eax
-	mov ecx,[ebp+16]			;Movemos el limite inferior	a ecx
-
-	push eax							;Apilamos el primer numero
-	push ecx 							;Apilamos el segundo numero
-	call calcMin					;Llamamos a la subrutina para sacar el minimo entre dos numeros
-	add esp,8							;Desapilamos
-
-	push ebx							;Apilamos el maximo
-	push eax							;Apilamos el minimo
-	call toInterval				;Armamos el intervalo
-	add esp,8							;Desapilamos
+	push ebx
+	push eax
+	call toInterval
+	pop edx
+	pop edx
 
 	leave
 	ret
