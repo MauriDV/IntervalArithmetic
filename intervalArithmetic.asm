@@ -145,48 +145,62 @@ subInterval:
 
 mulInterval:
 	enter 0,0
+	mov eax,0
+	mov ebx,0
+	mov ecx,0
+	mov edx,0
+	mov edi,0
 
-	mov ebx, 0						;Seteamos los registros
-	mov edx, 0						;
-	mov eax, 0						;
-	mov ecx, 0						;
+	mov ebx,[ebp+12] ;ebp+12 = (1.2)
+	shr ebx,16 ;ebx=1
+	mov ecx,[ebp+8] ;ebp+8 = (3.4)
+	shr ecx,16 ;ecx=3
+	imul ebx, ecx
+	push ebx ;ebx(1*3)=3
 
-	mov eax,[ebp+8]				;Movemos el numero a eax
-	mov ebx,[ebp+12]			;Movemos el numero a ebx
-	mov ecx,[ebp+16]			;Movemos el numero a ecx
-	mov edx,[ebp+20]			;Movemos el numero a edx
+	mov ebx, [ebp+12]
+	shr ebx,16
+	mov ecx, [ebp+8]
+	shl ecx,16
+	shr ecx,16
+	imul ebx, ecx ;ebx(1*4) = 4
+	push ebx
 
-	imul edx,ebx					;Multiplicamos los limites
+	mov ebx, [ebp+12]
+	shl ebx,16
+	shr ebx,16
+	mov ecx, [ebp+8]
+	shr ecx,16
+	imul ebx,ecx ;ebx(2*3)=6
+	push ebx
 
-	push edx							;Apilamos el primer resultado
-	mov edx,[ebp+20]			;Restrablecemos el valor del limite
+	mov ebx, [ebp+12]
+	shl ebx,16
+	shr ebx,16
+	mov ecx, [ebp+8]
+	shl ecx,16
+	shr ecx,16
+	imul ebx, ecx ;ebx(2*4)=8
+	push ebx
 
-	imul ecx, ebx					;Multiplicamos los limites
+	call minArray
 
-	push ecx							;Apilamos el segundo resultado
-	mov ecx,[ebp+16]			;Restablecemos el valor del limite
+	mov edx,eax
 
-	imul edx, eax					;Mutiplicamos los limites
+	call maxArray
 
-	push edx							;Apilamos el resultado
-	mov edx,[ebp+20]			;Restablecemos el valor del limite
+	pop esi
+	pop esi
+	pop esi
+	pop esi
 
-	imul ecx,eax					;Multiplicamos los limites
+	push edx
+	push eax
 
-	push ecx							;Apilamos el resultado
+	call toInterval
 
-	call maxArray					;Llamamos a la subrutina para calcular el maximo
-	mov edi, eax					;Lo que hay en eax (nro maximo del arreglo) lo ponemos en edi
-
-	call minArray					;Llamamos a la subrutina para calcular el minimo
-
-	add esp,16						;Desapilamos
-
-	push edi							;Apilamos el maximo
-	push eax							;Apilamos el minimo
-	call toInterval				;Armamos el intervalo
-	add esp, 8						;Desapilamos
-
+	pop esi
+	pop esi
 	leave
 	ret
 

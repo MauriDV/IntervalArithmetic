@@ -17,6 +17,7 @@
 int toInterval(int a, int b);
 int addInterval(int x, int y);
 int subInterval(int x, int y);
+int mulInterval(int x, int y);
 int getX(int x);
 int getY(int x);
 
@@ -39,4 +40,8 @@ int sumaIntervalar(int x, int y){
 
 int restaIntervalar(int x, int y){
   return subInterval(x,y);
+}
+
+int multiplicacionIntervalar(int x, int y){
+  return mulInterval(x,y);
 }
