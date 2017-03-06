@@ -1,11 +1,13 @@
 ;Exportamos las subrutinas.
-global toInterval       
-global addInterval      
+global toInterval
+global addInterval
 global subInterval
 global mulInterval
 global supInterval
 global infInterval
 global getIntervals
+global getX
+global getY
 
 section .data
 
@@ -21,87 +23,31 @@ section .text
 ; 	eax = [limiteInferior,limiteSuperior]
 ;
 
-toInterval: 
+toInterval:
 	enter 0,0             ;Setea la pila
 
 	mov eax,0
-	mov ax,[ebp+12]       ;Limite Superior 
+	mov ax,[ebp+12]       ;Limite Superior
 	rol eax,16            ;Rota el numero y lo pasa a la parte alta del registro
 	mov ax,[ebp+8]        ;Limite Inferior
 
 	leave
 	ret
 
-;-----------------------------------------------------------------------------------------------------------------
-;Subrutina que desarma los intervalos
-;
-; @params
-;		ebp+8 
-; @return
-; 	ebx = limite inferior 
-; 	edx = limite superior
-;
-
-getIntervals:
-
-	enter 0, 0
-
-	mov eax,0						  ;Seteamos los registros
-	mov ebx,0						  ;
-	mov edx,0						  ;
-	mov ecx,0						  ;
-
-	mov eax,[ebp+8]				;Pasamos el numero intervalar a eax
-
-	mov bx, ax						;pasamos el limite superior de eax a bx
-
-	push ebx							;Apilamos 
-	call esPositivo				;Llamamos a la subrutina esPositivo
-	add esp,4							;Desapilamos ebp
-
-	mov edx,ebx						;Pongo el primer numero completo (32bits) en ebx
-	shr eax,16						;Sacamos el limite inferior del numero intervalar
-
-	mov ebx,0							;seteamos ebx
-	mov bx, ax						;Pasamos el limite inferior a bx
-
-	push ebx							;Apilamos 
-	call esPositivo				;Llamamos a la subrutina
-	add esp,4							;Desapilamos
-
-	leave 
+getX:
+	enter 0,0
+	mov eax,0
+	mov eax,[ebp+8]
+	shr eax,16
+	leave
 	ret
 
-;-----------------------------------------------------------------------------------------------------------------
-;Subrutina privada que verifica si un 
-;numero es positivo, en el caso de ser 
-;negativo el numero se modifica ocupando 
-;los 32 bits del registro.
-;
-; @params
-;		ebp+8
-; @return
-; 	ebx (con el numero modificado en el caso de ser negativo)
-;
-
-esPositivo:
+getY:
 	enter 0,0
-
-	mov ecx,0							;Seteamos ecx
-	mov ecx,[ebp+8]				;Pasamos el primer numero a ecx
-	shl cx,1							;Shifteamos el primer bit del numero para saber si es positivo o negativo
-	jc negativo
-	jmp positivo
-	negativo:
-		add ebx,11111111111111110000000000000000b    ;Le sumamos la mascara para acomodar el numero negativo
-		jmp end
-
-	positivo:
-		jmp end							;Dejamos el numero como esta en caso de ser positivo
-
-	end:
-		leave
-		ret
+	mov eax,0
+	mov ax,[ebp+8]
+	leave
+	ret
 
 ;-----------------------------------------------------------------------------------------------------------------
 ;Subrutina que suma dos intervalos.
@@ -116,30 +62,34 @@ esPositivo:
 ;
 
 addInterval:
-
 	enter 0,0
 
-	mov ebx, 0						;Seteo los registros
-	mov edx, 0						;
-	mov eax, 0						;
-	mov ecx, 0						;
+	mov eax,0
+	mov ebx,0
+	mov ecx,0
+	mov edx,0
 
-	mov eax,[ebp+8]				;Movemos el numero a eax
-	mov ebx,[ebp+12]			;Movemos el numero a ebx
-	mov ecx,[ebp+16]			;Movemos el numero a ecx
-	mov edx,[ebp+20]			;Movemos el numero a edx
+	mov eax,[ebp+8] ;(3,4)
+	mov ebx,[ebp+12] ;(1,2)
 
-	add eax,edx						;Sumamos los limites inferiores
-	push eax							;Apilamos la suma de los limites superiores
-	add ebx,ecx						;Sumamos los limites superiores
+	mov dx,ax
+	shr eax,16
+	mov cx,bx
+	shr ebx,16
 
-	push ebx							;Apilamos la suma	superiores
-	call toInterval				;Llamamos a la subrutina toInterval para crear el intervalo
-	add esp,8							;Desapilamos las dos sumas
+	add eax,ebx	;(1+3)=4
+	add ecx,edx	;(2+4)=6
 
+	push eax
+	push ecx
+
+	call toInterval
+
+	pop edx
+	pop edx
+	mov edx,0
 	leave
 	ret
-
 ;-----------------------------------------------------------------------------------------------------------------
 ;Subrutina que resta dos intervalos.
 ;
@@ -152,27 +102,32 @@ addInterval:
 ; 	eax = [limiteInferior,limiteSuperior] (resta)
 ;
 
-subInterval: 
+subInterval:
 	enter 0,0
+	mov eax,0
+	mov ebx,0
+	mov ecx,0
+	mov edx,0
 
-	mov ebx, 0						;Seteo los registros
-	mov edx, 0						;
-	mov eax, 0						;
-	mov ecx, 0						;
+	mov eax,[ebp+8] ;(3,4)
+	mov ebx,[ebp+12] ;(5,10)
 
-	mov eax,[ebp+8]				;Movemos el numero a eax
-	mov ebx,[ebp+12]			;Movemos el numero a ebx
-	mov ecx,[ebp+16]			;Movemos el numero a ecx
-	mov edx,[ebp+20]			;Movemos el numero a edx
+	mov dx,ax ;dx=4
+	shr eax,16 ;eax=3
+	mov cx,bx	;cx = 10
+	shr ebx,16 ;ebx=5
 
-	sub ebx,edx						;Restamos los limites 
-	push ebx							;Apilamos el resultado
-	sub eax,ecx						;Restamos los limites 
+	sub ebx,eax	;(5-3)=2
+	sub ecx,edx	;(10-4)=6
 
-	push eax							;Apilamos el resultado
-	call toInterval				;Llamamos a la subrutina para crear el intervalo
-	add esp,8							;Desapilamos
+	push ebx
+	push ecx
 
+	call toInterval
+
+	pop edx
+	pop edx
+	mov edx,0
 	leave
 	ret
 
@@ -190,48 +145,62 @@ subInterval:
 
 mulInterval:
 	enter 0,0
+	mov eax,0
+	mov ebx,0
+	mov ecx,0
+	mov edx,0
+	mov edi,0
 
-	mov ebx, 0						;Seteamos los registros
-	mov edx, 0						;
-	mov eax, 0						;
-	mov ecx, 0						;
+	mov ebx,[ebp+12] ;ebp+12 = (1.2)
+	shr ebx,16 ;ebx=1
+	mov ecx,[ebp+8] ;ebp+8 = (3.4)
+	shr ecx,16 ;ecx=3
+	imul ebx, ecx
+	push ebx ;ebx(1*3)=3
 
-	mov eax,[ebp+8]				;Movemos el numero a eax
-	mov ebx,[ebp+12]			;Movemos el numero a ebx
-	mov ecx,[ebp+16]			;Movemos el numero a ecx
-	mov edx,[ebp+20]			;Movemos el numero a edx
+	mov ebx, [ebp+12]
+	shr ebx,16
+	mov ecx, [ebp+8]
+	shl ecx,16
+	shr ecx,16
+	imul ebx, ecx ;ebx(1*4) = 4
+	push ebx
 
-	imul edx,ebx					;Multiplicamos los limites
+	mov ebx, [ebp+12]
+	shl ebx,16
+	shr ebx,16
+	mov ecx, [ebp+8]
+	shr ecx,16
+	imul ebx,ecx ;ebx(2*3)=6
+	push ebx
 
-	push edx							;Apilamos el primer resultado
-	mov edx,[ebp+20]			;Restrablecemos el valor del limite 
+	mov ebx, [ebp+12]
+	shl ebx,16
+	shr ebx,16
+	mov ecx, [ebp+8]
+	shl ecx,16
+	shr ecx,16
+	imul ebx, ecx ;ebx(2*4)=8
+	push ebx
 
-	imul ecx, ebx					;Multiplicamos los limites
+	call minArray
 
-	push ecx							;Apilamos el segundo resultado
-	mov ecx,[ebp+16]			;Restablecemos el valor del limite
+	mov edx,eax
 
-	imul edx, eax					;Mutiplicamos los limites
+	call maxArray
 
-	push edx							;Apilamos el resultado
-	mov edx,[ebp+20]			;Restablecemos el valor del limite
+	pop esi
+	pop esi
+	pop esi
+	pop esi
 
-	imul ecx,eax					;Multiplicamos los limites
+	push edx
+	push eax
 
-	push ecx							;Apilamos el resultado
+	call toInterval
 
-	call maxArray					;Llamamos a la subrutina para calcular el maximo
-	mov edi, eax					;Lo que hay en eax (nro maximo del arreglo) lo ponemos en edi
-
-	call minArray					;Llamamos a la subrutina para calcular el minimo
-
-	add esp,16						;Desapilamos
-
-	push edi							;Apilamos el maximo
-	push eax							;Apilamos el minimo
-	call toInterval				;Armamos el intervalo
-	add esp, 8						;Desapilamos
-
+	pop esi
+	pop esi
 	leave
 	ret
 
@@ -250,34 +219,44 @@ mulInterval:
 infInterval:
 	enter 0,0
 
-	mov ebx, 0						;Seteamos los registros
-	mov edx, 0						;
-	mov eax, 0						;
-	mov ecx, 0						;
+	mov eax,0
+	mov ecx,0
+	mov edx,0
+	mov ebx,0
 
-	mov ebx,[ebp+12]			;Movemos el limite superior a ebx
-	mov edx,[ebp+20]			;Movemos el limite superior a edx
-
-	push ebx							;Apilamos el primer numero
-	push edx							;Apilamos el segundo numero
-	call calcMin					;Llamamos a la subrutina para que calcule el minimo
-	add esp,8							;Desapilamos
+	mov eax,[ebp+12] ;ebp+12 =(1.2)
+	shr eax,16
+	push eax ;eax=1
+	mov eax,[ebp+8] ;ebp+8 =(3.4)
+	shr eax,16
+	push eax ;eax=3
+	mov eax,0
+	call calcMax
+	pop edx
+	pop edx
 
 	mov ebx,eax
 
-	mov eax,[ebp+8]				;Movemos el limite inferior a eax
-	mov ecx,[ebp+16]			;Movemos el limite inferior a ecx
-	
-	push eax							;Apilamos el primer numero
-	push ecx 							;Apilamos el segundo numero
-	call calcMax					;Llamamos a la subrutina para que calcule el maximo
-	add esp,8							;Desapilamos
+	mov eax,0
+	mov eax,[ebp+12]	;ebp+12 =(1.2)
+	shl eax,16
+	shr eax,16 ;eax = 2
+	push eax
+	mov eax,[ebp+8] ;ebp+8 =(3.4)
+	shl eax,16
+	shr eax,16
+	push eax
+	call calcMin
 
-	push ebx							;Apilamos el minimo
-	push eax							;Apilamos el maximo
-	call toInterval				;Armamos el intervalo
-	add esp,8							;Desapilamos
-	
+	pop edx
+	pop edx
+
+	push eax
+	push ebx
+	call toInterval
+	pop edx
+	pop edx
+
 	leave
 	ret
 
@@ -296,41 +275,50 @@ infInterval:
 supInterval:
 	enter 0,0
 
-	mov ebx, 0						;Seteamos los registros
-	mov edx, 0						;
-	mov eax, 0						;
-	mov ecx, 0					  ;
+	mov eax,0
+	mov ebx,0
+	mov ecx,0
+	mov ebx,0
 
-	mov ebx,[ebp+12]			;Movemos el limite superior a ebx
-	mov edx,[ebp+20]			;Movemos el limite superior a edx
+	mov eax,[ebp+12] ;ebp+12 =(1.2)
+	shr eax,16 ;eax=1
+	push eax
+	mov eax,0
+	mov eax,[ebp+8] ;ebp+8=(3.4)
+	shr eax,16 ;eax=3
+	push eax
+	call calcMin
+	pop edx
+	pop edx
 
-	push ebx							;Apilamos el primero numero
-	push edx							;Apilamos el segundo numero
-	call calcMax					;Llamamos a la subrutina para sacar el maximo entre los dos numeros
-	add esp,8							;Desapilamos
+	mov ebx,eax
+	mov eax,0
 
-	mov ebx,eax						;Ponemos el resultado en ebx
+	mov eax,[ebp+12] ;ebp+12 =(1.2)
+	shl eax, 16
+	shr eax, 16 ;eax = 2
+	push eax
+	mov eax,[ebp+8] ;ebp+8 = (3.4)
+	shl eax,16
+	shr eax,16 ;eax = 4
+	push eax
+	call calcMax
+	pop edx
+	pop edx
 
-	mov eax,[ebp+8]				;Movemos el limite inferior a eax
-	mov ecx,[ebp+16]			;Movemos el limite inferior	a ecx
-	
-	push eax							;Apilamos el primer numero
-	push ecx 							;Apilamos el segundo numero
-	call calcMin					;Llamamos a la subrutina para sacar el minimo entre dos numeros
-	add esp,8							;Desapilamos
+	push ebx
+	push eax
+	call toInterval
+	pop edx
+	pop edx
 
-	push ebx							;Apilamos el maximo
-	push eax							;Apilamos el minimo
-	call toInterval				;Armamos el intervalo
-	add esp,8							;Desapilamos
-	
 	leave
 	ret
 
 ;-----------------------------------------------------------------------------------------------------------------
-;Subrutina privada que calcula el 
+;Subrutina privada que calcula el
 ;maximo entre 4 numeros (resultados
-;de las multiplicaciones) pasados como 
+;de las multiplicaciones) pasados como
 ;parametros.
 ;
 ; @params
@@ -347,7 +335,7 @@ maxArray:
 
 	mov eax, 0
 	mov ecx, 0
-	mov eax, [ebp+8]			;Muevo el numero a eax 
+	mov eax, [ebp+8]			;Muevo el numero a eax
 	mov esi, 0						;Seteo esi(variable control)
 	add esi,12						;Le sumo 12(No tomamos el primer numero de la pila "ebp+8")
 	while_loop_max:
@@ -368,9 +356,9 @@ maxArray:
 		ret
 
 ;-----------------------------------------------------------------------------------------------------------------
-;Subrutina privada que calcula el 
+;Subrutina privada que calcula el
 ;minimo entre 4 numeros (resultados
-;de las multiplicaciones) pasados como 
+;de las multiplicaciones) pasados como
 ;parametros.
 ;
 ; @params
@@ -410,8 +398,8 @@ minArray:
 		ret
 
 ;-----------------------------------------------------------------------------------------------------------------
-;Subrutina privada que calcula el 
-;maximo entre 2 numeros pasados como 
+;Subrutina privada que calcula el
+;maximo entre 2 numeros pasados como
 ;parametros.
 ;
 ; @params
@@ -438,14 +426,14 @@ calcMax:
 			jmp end_max				;Salto al final de la subrutina
 
 	mayorIzq:
-		jmp end_max       	; Solo por convencion salto al final luego de cada "metodo".	
+		jmp end_max       	; Solo por convencion salto al final luego de cada "metodo".
 	end_max:
 		leave
 		ret
 
 ;-----------------------------------------------------------------------------------------------------------------
-;Subrutina privada que calcula el 
-;minimo entre 2 numeros pasados como 
+;Subrutina privada que calcula el
+;minimo entre 2 numeros pasados como
 ;parametros.
 ;
 ; @params
@@ -472,7 +460,7 @@ calcMin:
 		jmp end_min			;Salto a la etiqueta "end_min"
 
 	menorIzq:
-		jmp end_min     	
+		jmp end_min
 	end_min:
 		leave
 		ret
