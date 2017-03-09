@@ -26,15 +26,12 @@ int getY(int x);
 
 // -------------------------------------------------------------------------
 
-int printInterval(int x){
+char * printInterval(int x){
+  char * a = "";
   int x1 = getX(x);
   int y1 = getY(x);
-  if(x1>=y1){
-    printf("Vacio o no es una representacion valida \n");
-  }else{
-    printf("[%x,%x]\n", x1,y1);
-  }
-  return 0;
+  asprintf(&a, "[%i,%i]",x1,y1) ;
+  return a;
 }
 
 int createInterval(int x, int y){
