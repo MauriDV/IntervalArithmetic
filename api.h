@@ -30,7 +30,11 @@ char * printInterval(int x){
   char * a = "";
   int x1 = getX(x);
   int y1 = getY(x);
-  asprintf(&a, "[%i,%i]",x1,y1) ;
+  if(x1>=y1){
+    asprintf(&a, "Vacio o el numero no tiene una representacion valida") ;
+  }else{
+    asprintf(&a, "[%i,%i]",x1,y1) ;
+  }
   return a;
 }
 
