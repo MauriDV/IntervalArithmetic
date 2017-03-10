@@ -43,7 +43,7 @@ toInterval:
 ; 	eax = [limiteInferior,limiteSuperior]
 ;
 
-getX:
+getY:
 	enter 0,0
 	mov eax,0
 	mov eax,[ebp+8]
@@ -64,7 +64,7 @@ getX:
 ; 	eax = [limiteInferior,limiteSuperior]
 ;
 
-getY:
+getX:
 	enter 0,0
 	mov eax,0
 	mov ax,[ebp+8]
@@ -339,8 +339,8 @@ mulInterval:
 	pop esi
 	pop esi
 
-	push edx
 	push eax
+	push edx
 
 	call toInterval
 
@@ -385,7 +385,7 @@ infInterval:
 
 	push eax
 	mov eax,0
-	call calcMax
+	call calcMin
 	pop edx
 	pop edx
 
@@ -401,7 +401,7 @@ infInterval:
 	shl eax,16
 	shr eax,16
 	push eax
-	call calcMin
+	call calcMax
 
 	pop edx
 	pop edx
@@ -440,7 +440,7 @@ supInterval:
 	mov eax,[ebp+8]
 	shr eax,16
 	push eax
-	call calcMin
+	call calcMax
 	pop edx
 	pop edx
 
@@ -455,7 +455,7 @@ supInterval:
 	shl eax,16
 	shr eax,16
 	push eax
-	call calcMax
+	call calcMin
 	pop edx
 	pop edx
 
